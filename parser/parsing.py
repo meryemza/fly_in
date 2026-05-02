@@ -4,9 +4,11 @@ class parser:
 
     def parse_data(self, path):
         zones = {}
-        # start_hub = {}
-        # end_hub = {}
+        first_line = 0
+        start_hub = {}
+        end_hub = {}
         connetcion = {}
+        coordonate = []
         try:
             with open(path) as f:
                 lines = []
@@ -18,9 +20,35 @@ class parser:
                     if line.startswith('#') or not line:
                         continue
                     elif line.startswith("nb_drones"):
+                       if first_line:
+                           raise Exception ("nb_drones duplicate")
                        nb_drones =  self.validate_drones(line)
-                    elif line.startswith(("start_hub", "end_hub", "hub")):
-                        self.validate_hub(line)
+                       first_line = 1
+                       continue
+                    elif line.startswith("start_hub"):
+                        if not start_hub:
+                             raise Exception ("start_hub duplicate")
+                        start_hub = self.validate_hub(line)
+                        if start_hub["name"] in zones:
+                            raise Exception ("duplicate name zone")
+                        if (start_hub["x"],start_hub["y"]) in coordonate:
+                            raise Exception ("duplicate coordonate zone")
+                        coordonate.append((start_hub["x"],start_hub["y"]))
+                        zones[zone["name"]] = zone
+                    elif line.startswith("end_hub"):
+                        if not end_hub:
+                             raise Exception ("end_hub duplicate")
+                        end_hub = self.validate_hub(line)
+                        if end_hub["name"] in zones:
+                            raise Exception ("duplicate name zone")
+                        if (end_hub["x"],end_hub["y"]) in coordonate:
+                            raise Exception ("duplicate coordonate zone")
+                        coordonate.append((end_hub["x"],end_hub["y"]))
+                        zones[zone["name"]] = zone
+                    elif line.startswith("hub"):
+                        zone = self.validate_hub(line)
+
+                        zones[zone["name"]] = zone
                     elif line.startswith("connection"):
                         self.validate_connection(line)
         except FileNotFoundError:
@@ -46,16 +74,35 @@ class parser:
             y = int(info[2])
             if(y < 0):
                 raise Exception("The y-coordinate is less than 0")
-            if len(info == 4):
-                meta_data = self.validate_data(info[3])
-            else:
-                meta_data = {"zone":"normal", "color":"none", "max_drones":1}
-            return { "name": name, "x": x, "y": y, "meta_data": meta_data}
+            meta_data = self.validate_data(info[3])
+            if "zone" not in meta_data:
+                meta_data["zone"] = "normal"
+            if "color" not in meta_data:
+                meta_data["color"] = "none"
+            if "max_drones" not in meta_data:
+                meta_data["max_drones"] = 1
+            return { "name": name, "x": x, "y": y, 
+                    "zone": meta_data["zone"],
+                    "color": meta_data["color"],
+                    "max_drones": meta_data["max_drones"]}
         except ValueError:
             print("invalid number")
 
     def validate_data(line:str)-> dict:
-        data = line.split(" ")
+        data = {}
+        if not line :
+            return data
+        for k in line.split(" "):
+            key, value = k.split("=")
+            if key not in ["zone", "color", "max_drones"]:
+                raise Exception("invalide meta data")
+            if not key or not value:
+                raise Exception("uncomplete meta data")
+            data[key] = value
+        return data
+            
+
+
         
 
         
