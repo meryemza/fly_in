@@ -7,7 +7,7 @@ class parser:
         first_line = 0
         start_hub = {}
         end_hub = {}
-        connetcion = {}
+        connetcion = []
         coordonate = []
         try:
             with open(path) as f:
@@ -53,9 +53,18 @@ class parser:
                             raise Exception ("duplicate coordonate zone")
                         coordonate.append((zone["x"],zone["y"]))
                         zones[zone["name"]] = zone
-                    # elif line.startswith("connection"):
-                    #     self.validate_connection(line)
+                    elif line.startswith("connection"):
+                       con = self.validate_connection(line)
+                       if con[0] not in zones or con[1] not in zones:
+                           raise  Exception ("invalide zone")
+                       connetcion.append(con)
+                    else:
+                        raise Exception("invalide line")
             print(zones)
+            print()
+            print(connetcion)
+            print()
+            print(nb_drones)
         except FileNotFoundError:
             print("file not found")
     def validate_drones(self, line:str) -> int:
@@ -86,6 +95,7 @@ class parser:
                 meta_data["color"] = "none"
             if "max_drones" not in meta_data:
                 meta_data["max_drones"] = 1
+            
             return { "name": name, "x": x, "y": y, 
                     "zone": meta_data["zone"],
                     "color": meta_data["color"],
@@ -102,11 +112,24 @@ class parser:
             if "=" not in k:
                 raise Exception("invalid metadata format")
             key, value = k.split("=")
-            if key not in ["zone", "color", "max_drones"]:
+            if key not in ["zone", "color", "max_drones", "max_link_capacity"]:
                 raise Exception("invalid meta data")
             if not key or not value:
                 raise Exception("uncomplete meta data")
             data[key] = value
         return data
+    def validate_connection(self, line):
+        data = line.split(":")
+        info = data[1].strip().split("[")
+        zone1, zone2 = info[0].strip().split("-")
+        meta_data = self.validate_data(info[1])
+        if not meta_data:
+                meta_data["max_link_capacity"] = 1
+        if int(meta_data["max_link_capacity"]) <= 0:
+            raise Exception("invalide number for max link capacity")
+        return [zone1, zone2, meta_data]
+
+
+
 p = parser()
 p.parse_data("data.txt")
