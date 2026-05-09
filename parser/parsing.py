@@ -2,6 +2,7 @@ from .class_error import MapError
 from objects.Zone import Hub
 from objects.Drone import Drone
 from objects.Connection import Connection
+from objects.Data import Data
 import re
 
 class parser:
@@ -37,6 +38,7 @@ class parser:
                         if  start_hub:
                              raise MapError ("start_hub duplicate")
                         start_hub = self.validate_hub(line)
+                        start_hub.is_start = True
                         if start_hub.name in zones:
                             raise MapError ("duplicate name zone")
                         if (start_hub.x,start_hub.y) in coordonate:
@@ -51,6 +53,7 @@ class parser:
                         if end_hub:
                              raise MapError ("end_hub duplicate")
                         end_hub = self.validate_hub(line)
+                        end_hub.is_end = True
                         if end_hub.name in zones:
                             raise MapError ("duplicate name zone")
                         if (end_hub.x,end_hub.y) in coordonate:
@@ -88,11 +91,15 @@ class parser:
             raise MapError("end_hub is missing")
         for i in range(nb_drones):
              Drones.append(Drone(i +1, start_hub.name))
-        for zone in zones:
-            for con in connetcion:
-                 if con.zone1 == zone or con.zone2 == zone:
-                     zones[zone].connected_zones.append(con)
-        return {"nb_drones": nb_drones,"Drones": Drones, "start_zone": start_hub, "end_zone": end_hub, "zones": zones, "connections": connetcion}
+
+        for con in connetcion:
+                 z1 = zones[con.zone1]
+                 z2 = zones[con.zone2]
+                 if zones[con.zone2].type != "blocked" and zones[con.zone1].type != "blocked":
+                    z1.neighbors.append((z2.name, con.capacity))
+                    z2.neighbors.append((z1.name, con.capacity))
+        
+        return Data(nb_drones, Drones, start_hub, end_hub, zones, connetcion)
     def validate_drones(self, line:str) -> int:
         data = line.split(":")
         try:
@@ -164,6 +171,3 @@ class parser:
         if int(meta_data["max_link_capacity"]) <= 0:
             raise MapError("invalide number for max link capacity")
         return Connection(zone1, zone2, meta_data["max_link_capacity"])
-
-p = parser()
-print(p.parse_data("data.txt"))

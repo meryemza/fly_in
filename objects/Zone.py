@@ -6,6 +6,9 @@ class Hub:
         self.type = type
         self.color = color
         self.max_drones = max_drones
-        self.connected_zones = []
+        self.neighbors = []
+        self.is_start = False
+        self.is_end = False
+
     def __repr__(self):
         return f"(name={self.name}, x={self.x}, y={self.y}, type={self.type}, color={self.color}, max_drones={self.max_drones}, connected_zones={self.connected_zones})"
