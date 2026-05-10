@@ -13,7 +13,7 @@ class pathfound:
         else:
             return 1
     
-    def found_path(self):
+    def find_path(self):
         distance = {}
         previous = {}
         path = []

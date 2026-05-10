@@ -98,6 +98,7 @@ class parser:
                  if zones[con.zone2].type != "blocked" and zones[con.zone1].type != "blocked":
                     z1.neighbors.append((z2.name, con.capacity))
                     z2.neighbors.append((z1.name, con.capacity))
+        zones[start_hub.name].current_drones = nb_drones
         
         return Data(nb_drones, Drones, start_hub, end_hub, zones, connetcion)
     def validate_drones(self, line:str) -> int:

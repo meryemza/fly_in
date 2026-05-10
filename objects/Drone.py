@@ -3,6 +3,8 @@ class Drone:
         self.id = id
         self.current_zone = current_zone
         self.path = []
+        self.finished = False
+        self.current_index = 0
     def __repr__(self):
         return f"(id={self.id}, current_zone={self.current_zone})"
     # __repr__ is a special method in Python used to define how an object should be represented as a string when it is printed
