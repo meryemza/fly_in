@@ -7,7 +7,7 @@ from simulation import Simulation
 
 def main():
     p = parser()
-    data = p.parse_data("data.txt")
+    data = p.parse_data("01_linear_path.txt")
     graph = Graph(data).build()
     path = pathfound(graph)
     pathh = path.find_path()

@@ -27,6 +27,7 @@ class Simulation:
                             drone.current_index = next_index
                             drone.current_zone = self.path[next_index]
                             moves.append(f"D{drone.id}-{drone.current_zone}")
+                        continue
                 if next_index < len(self.path) and not drone.in_transit:
                     next_zone = self.zones[self.path[next_index]]
                     current_zone = self.zones[self.path[current_index]]
@@ -36,7 +37,7 @@ class Simulation:
                             if next_zone.type == "restricted":
                                 drone.in_transit = True
                                 con.current_load +=1
-                                drone.remaining_turns = 1
+                                drone.remaining_turns = 2
                                 moves.append(f"D{drone.id}-{current_zone.name}-{next_zone.name}")
                             else:
                                 next_zone.current_drones += 1

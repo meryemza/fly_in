@@ -99,7 +99,6 @@ class parser:
                     z1.neighbors.append((z2.name, con.capacity))
                     z2.neighbors.append((z1.name, con.capacity))
         zones[start_hub.name].current_drones = nb_drones
-        
         return Data(nb_drones, Drones, start_hub, end_hub, zones, connetcion)
     def validate_drones(self, line:str) -> int:
         data = line.split(":")
@@ -169,6 +168,7 @@ class parser:
         meta_data = self.validate_data(data.group(3))
         if not meta_data:
                 meta_data["max_link_capacity"] = 1
+        
         if int(meta_data["max_link_capacity"]) <= 0:
             raise MapError("invalide number for max link capacity")
-        return Connection(zone1, zone2, meta_data["max_link_capacity"])
+        return Connection(zone1, zone2, int(meta_data["max_link_capacity"]))
