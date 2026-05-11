@@ -13,9 +13,9 @@ def main():
     pathh = path.find_path()
     print(pathh)
     simulation = Simulation(graph, pathh)
-    # print(data.drones)
+    print(data.drones)
     move = simulation.move_drones()
-    # print(data.drones)
+    print(data.drones)
 
 
 main()
