@@ -9,6 +9,7 @@ class Simulation:
     
     def move_drones(self):
         finish = 0
+        i = 0
         while finish < self.nb_drones:
             moves = []
             for drone in self.drones:
@@ -16,8 +17,10 @@ class Simulation:
                 next_index = current_index+1
                 if drone.finished:
                     continue
-                if drone.in_transit:
+                if drone.in_transit and next_index < len(self.path):
                         con = self.get_connection(self.path[current_index], self.path[next_index])
+                        next_zone = self.zones[self.path[next_index]]
+                        current_zone = self.zones[self.path[current_index]]
                         drone.remaining_turns-=1
                         if drone.remaining_turns == 0:
                             con.current_load -=1
@@ -48,7 +51,9 @@ class Simulation:
                 if drone.current_zone == self.path[-1] and  not drone.finished:
                     drone.finished = True
                     finish += 1
+            i+=1
             print(" ".join(moves))
+        print(f"{i} turns")
           
 
     def get_connection(self, zone1, zone2) :

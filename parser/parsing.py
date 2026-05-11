@@ -19,16 +19,16 @@ class parser:
         try:
             with open(path) as f:
                 lines = []
-                for l in f:
-                    lines.append(l.strip())
+                for k , l in enumerate(f, start=1):
+                    lines.append((k,l.strip()))
                 if not lines:
                     raise MapError("empty file")
-                for line in lines:
+                for k, line in lines:
                     if line.startswith('#') or not line:
                         continue
                     elif line.startswith("nb_drones"):
                        if first_line:
-                           raise MapError ("nb_drones duplicate")
+                           raise MapError (f"nb_drones duplicate in line{k}")
                        nb_drones =  self.validate_drones(line)
                        first_line = 1
                        continue
@@ -42,7 +42,7 @@ class parser:
                         if start_hub.name in zones:
                             raise MapError ("duplicate name zone")
                         if (start_hub.x,start_hub.y) in coordonate:
-                            raise MapError ("duplicate coordonate zone")
+                            raise MapError (f"duplicate coordonate zone in line {k}")
                         if start_hub.type == "blocked":
                             raise MapError ("start_hub can't be blocked")
                         if start_hub.max_drones < nb_drones:
@@ -57,7 +57,7 @@ class parser:
                         if end_hub.name in zones:
                             raise MapError ("duplicate name zone")
                         if (end_hub.x,end_hub.y) in coordonate:
-                            raise MapError ("duplicate coordonate zone")
+                            raise MapError (f"duplicate coordonate zone in line {k}")
                         if end_hub.type == "blocked":
                             raise MapError ("end_hub can't be blocked")
                         if end_hub.max_drones < nb_drones:
@@ -69,7 +69,7 @@ class parser:
                         if zone.name in zones:
                             raise MapError ("duplicate name zone")
                         if (zone.x,zone.y) in coordonate:
-                            raise MapError ("duplicate coordonate zone")
+                            raise MapError (f"duplicate coordonate zone in line {k}")
                         coordonate.append((zone.x,zone.y))
                         zones[zone.name] = zone
                     elif line.startswith("connection"):
