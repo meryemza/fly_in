@@ -10,6 +10,8 @@ class pathfound:
     def get_cost(self, zone):
         if zone.type == "restricted":
             return 2
+        elif zone.type == "priority":
+            return 0.9
         else:
             return 1
     
