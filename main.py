@@ -17,5 +17,7 @@ def main():
     move = simulation.move_drones()
     print(data.drones)
 
-
-main()
+try:
+    main()
+except Exception as e:
+    print(e)

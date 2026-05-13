@@ -6,7 +6,6 @@ class Drone:
         self.finished = False
         self.current_index = 0
         self.in_transit = False
-        self.remaining_turns = 0
     def __repr__(self):
         return f"(id={self.id}, current_zone={self.current_zone})"
     # __repr__ is a special method in Python used to define how an object should be represented as a string when it is printed

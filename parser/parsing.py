@@ -29,7 +29,7 @@ class parser:
                     elif line.startswith("nb_drones"):
                        if first_line:
                            raise MapError (f"nb_drones duplicate in line{k}")
-                       nb_drones =  self.validate_drones(line)
+                       nb_drones =  self.validate_drones(k,line)
                        first_line = 1
                        continue
                     elif not first_line:
@@ -37,14 +37,15 @@ class parser:
                     elif line.startswith("start_hub"):
                         if  start_hub:
                              raise MapError ("start_hub duplicate")
-                        start_hub = self.validate_hub(line)
+                        start_hub = self.validate_hub(k,line)
                         start_hub.is_start = True
+                        start_hub.max_drones = nb_drones
                         if start_hub.name in zones:
-                            raise MapError ("duplicate name zone")
+                            raise MapError (f"duplicate name zone in line {k}")
                         if (start_hub.x,start_hub.y) in coordonate:
                             raise MapError (f"duplicate coordonate zone in line {k}")
                         if start_hub.type == "blocked":
-                            raise MapError ("start_hub can't be blocked")
+                            raise MapError (f"start_hub can't be blocked in line {k}")
                         if start_hub.max_drones < nb_drones:
                             raise MapError ("start_hub max_drones can't be less than number of drones")
                         coordonate.append((start_hub.x,start_hub.y))
@@ -52,10 +53,11 @@ class parser:
                     elif line.startswith("end_hub"):
                         if end_hub:
                              raise MapError ("end_hub duplicate")
-                        end_hub = self.validate_hub(line)
+                        end_hub = self.validate_hub(k,line)
                         end_hub.is_end = True
+                        end_hub.max_drones = nb_drones
                         if end_hub.name in zones:
-                            raise MapError ("duplicate name zone")
+                            raise MapError (f"duplicate name zone in line {k}")
                         if (end_hub.x,end_hub.y) in coordonate:
                             raise MapError (f"duplicate coordonate zone in line {k}")
                         if end_hub.type == "blocked":
@@ -65,20 +67,20 @@ class parser:
                         coordonate.append((end_hub.x,end_hub.y))
                         zones[end_hub.name] = end_hub
                     elif line.startswith("hub"):
-                        zone = self.validate_hub(line)
+                        zone = self.validate_hub(k, line)
                         if zone.name in zones:
-                            raise MapError ("duplicate name zone")
+                            raise MapError (f"duplicate name zone in line {k}")
                         if (zone.x,zone.y) in coordonate:
                             raise MapError (f"duplicate coordonate zone in line {k}")
                         coordonate.append((zone.x,zone.y))
                         zones[zone.name] = zone
                     elif line.startswith("connection"):
-                       con = self.validate_connection(line)
+                       con = self.validate_connection(k, line)
                        for co in connetcion:
                             if con.zone1 == co.zone1 and con.zone2 == co.zone2 or con.zone1 == co.zone2 and con.zone2 == co.zone1:
-                                raise MapError ("duplicate connection")
+                                raise MapError ("duplicate connection in line {k}")
                        if con.zone1 not in zones or con.zone2 not in zones:
-                           raise  MapError ("invalide zone")
+                           raise  MapError ("invalide zone in line {k}")
                        connetcion.append(con)
                     else:
                         raise MapError("invalide line")
@@ -100,28 +102,28 @@ class parser:
                     z2.neighbors.append((z1.name, con.capacity))
         zones[start_hub.name].current_drones = nb_drones
         return Data(nb_drones, Drones, start_hub, end_hub, zones, connetcion)
-    def validate_drones(self, line:str) -> int:
+    def validate_drones(self, nb_line:int, line:str) -> int:
         data = line.split(":")
         try:
             nb_drones = int(data[1])
             if nb_drones <= 0:
-                raise MapError("number of drones less than or equal to 0")
+                raise MapError(f"number of drones less than or equal to 0 in line {nb_line}")
             return nb_drones
         except ValueError :
-            raise MapError("invalid number")
+            raise MapError(f"invalid number in line {nb_line}")
 
-    def validate_hub(self, line:str) -> Hub:
+    def validate_hub(self,nb_line:int, line:str) -> Hub:
         meta_data = {}
-        line_format = r":\s*(\w+)\s+(\d+)\s+(\d+)\s*(?:\[(.*?)\])?$"
+        line_format = r":\s*(\w+)\s+(-?\d+)\s+(-?\d+)\s*(?:\[(.*?)\])?$"
         data = re.search(line_format, line)
         if not data:
-            raise MapError("invalid line format")
+            raise MapError(f"invalid line format in line {nb_line}")
         name = data.group(1)
         try:
                 x = int(data.group(2))
                 y = int(data.group(3))
         except ValueError:
-            raise MapError("invalid number")
+            raise MapError(f"invalid number in line {nb_line}")
         if data.group(4) is None:
             meta_data["zone"] = "normal"
             meta_data["color"] = "none"
@@ -129,7 +131,7 @@ class parser:
             max_drones = 1
 
         else:
-                meta_data = self.validate_data(data.group(4))
+                meta_data = self.validate_data(nb_line, data.group(4))
                 if "zone" not in meta_data:
                         meta_data["zone"] = "normal"
                 if "color" not in meta_data:
@@ -138,34 +140,35 @@ class parser:
                         meta_data["max_drones"] = 1
                 max_drones = int(meta_data["max_drones"])
                 if max_drones <= 0:
-                        raise MapError("invalide number for max drones")
+                        raise MapError(f"invalide number for max drones in line {nb_line}")
                 if meta_data["zone"] not in self.zone:
-                        raise MapError("invalid zone")
+                        raise MapError(f"invalid zone in line {nb_line}")
         return  Hub (name, x, y, meta_data["zone"], meta_data["color"], max_drones)
 
-    def validate_data(self, line:str)-> dict:
+    def validate_data(self,nb_line:int, line:str)-> dict:
         data = {}
         if not line :
             return data
         line = line.replace("[", "").replace("]", "").strip()
         for k in line.split():
             if "=" not in k:
-                raise MapError("invalid metadata format")
+                raise MapError(f"invalid metadata format in line {nb_line}")
             key, value = k.split("=")
             if key not in ["zone", "color", "max_drones", "max_link_capacity"]:
-                raise MapError("invalid meta data")
+                raise MapError(f"invalid meta data in line {nb_line}")
             if not key or not value:
-                raise MapError("uncomplete meta data")
+                raise MapError(f"uncomplete meta data in line {nb_line}")
             data[key] = value
         return data
-    def validate_connection(self, line):
+
+    def validate_connection(self,nb_line:int, line):
         meta_data = {}
         line_format = r":\s*(\w+)-(\w+)\s*(?:\[(.*?)\])?$"
         data = re.search(line_format, line)
         if not data:
             raise MapError("invalid line format")
         zone1, zone2 = data.group(1), data.group(2)
-        meta_data = self.validate_data(data.group(3))
+        meta_data = self.validate_data(nb_line,data.group(3))
         if not meta_data:
                 meta_data["max_link_capacity"] = 1
         

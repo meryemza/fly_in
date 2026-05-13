@@ -12,8 +12,7 @@ class Simulation:
         finish = 0
         i = 0
         while finish < self.nb_drones:
-            moves = []
-            moved_this_turn = set()        
+            moves = []       
             zone_reserved = {}             
             con_reserved = {}              
             for drone in self.drones:
@@ -22,7 +21,6 @@ class Simulation:
                 if drone.finished:
                     continue
 
-            
                 if drone.in_transit and next_index < len(self.path):
                     con = self.get_connection(self.path[current_index], self.path[next_index])
                     next_zone = self.zones[self.path[next_index]]
@@ -35,25 +33,22 @@ class Simulation:
                         current_zone.current_drones -= 1  
                         drone.current_index = next_index
                         drone.current_zone = self.path[next_index]
-                        moves.append(f"D{drone.id}-{drone.current_zone}")
-                        moved_this_turn.add(drone.id)     
+                        moves.append(f"D{drone.id}-{drone.current_zone}") 
                     continue
 
               
                 if next_index < len(self.path) and not drone.in_transit:
-                    # if drone.id in moved_this_turn:     
-                    #     continue                           
+                     
                     next_zone = self.zones[self.path[next_index]]
                     current_zone = self.zones[self.path[current_index]]
                     con = self.get_connection(self.path[current_index], self.path[next_index])
 
-                
                     con_used = con_reserved.get(con, 0)
                     zone_used = zone_reserved.get(self.path[next_index], 0)
                     zone_avail = next_zone.max_drones - next_zone.current_drones - zone_used
                     con_avail = con.capacity - con.current_load - con_used
 
-                    if zone_avail >=  0 and con_avail > 0:  
+                    if zone_avail >=  0 and con_avail >= 0:  
                         if next_zone.type == "restricted":
                             drone.in_transit = True
                             con.current_load += 1
