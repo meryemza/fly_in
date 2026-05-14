@@ -17,6 +17,7 @@ class Visualisation:
         scale, off_x, off_y = self.compute(screen)
         self.draw_connections(screen, scale, off_x, off_y, 60)
         self.draw_zone(screen, scale, off_x, off_y, 60)
+        self.draw_drone(screen, scale, off_x, off_y, 60)
         pygame.display.flip() # to update content on the display screen
         run = True 
         while(run):
@@ -55,7 +56,7 @@ class Visualisation:
             y = zon.y*scale+ off_y
             if zon.is_start:
                 zone = pygame.image.load("start.png")
-                zone = pygame.transform.scale(zone, (size, size))
+                zone = pygame.transform.scale(zone, (size, size)) #
                 screen.blit(zone,(x,y))
             elif zon.is_end:
                 zone = pygame.image.load("end.png")
@@ -71,5 +72,14 @@ class Visualisation:
             txt_rect = txt.get_rect()
             txt_rect.center = (place_txt_x, place_txt_y)
             screen.blit(txt, txt_rect)
+    
+    def draw_drone(self,screen ,scale, off_x, off_y, size):
+      half = size // 2
+      for drone in self.drones:
+          x = self.zones[drone.current_zone].x *scale + off_x + half
+          y = self.zones[drone.current_zone].y *scale + off_y + half
+          d = pygame.image.load("drone.png")
+          d = pygame.transform.scale(d, (size , size))
+          screen.blit(d,(x,y))
     
 
