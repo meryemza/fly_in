@@ -3,6 +3,7 @@ from parser.parsing import parser
 from objects.Graph import Graph
 from path import pathfound
 from simulation import Simulation
+from visualisation import Visualisation
 
 
 def main():
@@ -16,6 +17,7 @@ def main():
     print(data.drones)
     move = simulation.move_drones()
     print(data.drones)
+    visualisation = Visualisation(graph).run()
 
 try:
     main()

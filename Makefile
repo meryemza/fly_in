@@ -1,5 +1,8 @@
 PYTHON = python3
 
+install:
+	pip install pygame
+
 run :
 	$(PYTHON) main.py
 
