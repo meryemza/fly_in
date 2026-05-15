@@ -1,4 +1,6 @@
 from objects.Graph import Graph
+from visualisation import Visualisation
+import pygame
 
 class Simulation:
     def __init__(self, graph: Graph, path):
@@ -7,11 +9,18 @@ class Simulation:
         self.path = path
         self.zones = graph.zone
         self.connection = graph.data.connections
+        self.finish = 0
+        self.nb_turns = 0
+        # self.screen = screen
+        # self.scale= scale
+        # self.off_y = off_y
+        # self.off_x = off_x
+        # self.size = size
+        # self.draw_drone = draw_drone
 
     def move_drones(self):
-        finish = 0
-        i = 0
-        while finish < self.nb_drones:
+            fini = 0
+        # while finish < self.nb_drones:
             moves = []       
             zone_reserved = {}             
             con_reserved = {}              
@@ -25,6 +34,7 @@ class Simulation:
                     con = self.get_connection(self.path[current_index], self.path[next_index])
                     next_zone = self.zones[self.path[next_index]]
                     current_zone = self.zones[self.path[current_index]]
+
                     drone.remaining_turns -= 1
                     if drone.remaining_turns == 0:
                         con.current_load -= 1
@@ -53,9 +63,10 @@ class Simulation:
                             drone.in_transit = True
                             con.current_load += 1
                             drone.remaining_turns = 1
-                            current_zone.current_drones -= 1  
+                            current_zone.current_drones -= 1 
+                            drone.next_zone = self.zones[self.path[next_index]]
                             zone_reserved[self.path[next_index]] = zone_used + 1  
-                            con_reserved[con] = con_used + 1                 
+                            con_reserved[con] = con_used + 1     
                             moves.append(f"D{drone.id}-{current_zone.name}-{next_zone.name}")
                         else:
                             next_zone.current_drones += 1
@@ -63,15 +74,19 @@ class Simulation:
                             drone.current_index = next_index
                             drone.current_zone = self.path[next_index]
                             zone_reserved[self.path[next_index]] = zone_used + 1  
-                            con_reserved[con] = con_used + 1                  
+                            con_reserved[con] = con_used + 1            
                             moves.append(f"D{drone.id}-{drone.current_zone}")
 
                 if drone.current_zone == self.path[-1] and not drone.finished:
                     drone.finished = True
-                    finish += 1
-            i += 1
+            for drone in self.drones:
+                if drone.finished:
+                    fini += 1
+            if fini == self.nb_drones:
+                self.finish = True 
             print(" ".join(moves))
-        print(f"{i} turns")
+            self.nb_turns+= 1
+            # print(f"{i} turns")
 
     def get_connection(self, zone1, zone2):
         for con in self.connection:

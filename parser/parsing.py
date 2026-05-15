@@ -78,12 +78,12 @@ class parser:
                        con = self.validate_connection(k, line)
                        for co in connetcion:
                             if con.zone1 == co.zone1 and con.zone2 == co.zone2 or con.zone1 == co.zone2 and con.zone2 == co.zone1:
-                                raise MapError ("duplicate connection in line {k}")
+                                raise MapError (f"duplicate connection in line {k}")
                        if con.zone1 not in zones or con.zone2 not in zones:
-                           raise  MapError ("invalide zone in line {k}")
+                           raise  MapError (f"invalide zone in line {k}")
                        connetcion.append(con)
                     else:
-                        raise MapError("invalide line")
+                        raise MapError (f"invalide line in lin {k}")
             
         except FileNotFoundError:
             raise MapError("file not found")
@@ -166,12 +166,12 @@ class parser:
         line_format = r":\s*(\w+)-(\w+)\s*(?:\[(.*?)\])?$"
         data = re.search(line_format, line)
         if not data:
-            raise MapError("invalid line format")
+            raise MapError(f"invalid line format in lie {nb_line}")
         zone1, zone2 = data.group(1), data.group(2)
         meta_data = self.validate_data(nb_line,data.group(3))
         if not meta_data:
                 meta_data["max_link_capacity"] = 1
         
         if int(meta_data["max_link_capacity"]) <= 0:
-            raise MapError("invalide number for max link capacity")
+            raise MapError(f"invalide number for max link capacity in line {nb_line}")
         return Connection(zone1, zone2, int(meta_data["max_link_capacity"]))

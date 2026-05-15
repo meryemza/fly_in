@@ -2,30 +2,54 @@ import pygame
 from objects.Graph import Graph
 
 class Visualisation:
-    def __init__(self, graph:Graph):
+    def __init__(self, graph:Graph, simulation):
         self.zones = graph.zone
         self.drones = graph.data.drones
         self.connections = graph.data.connections
+        self.size = 70
+        self.simulation = simulation
     def run(self):
         pygame.init()
-
+        self.clock = pygame.time.Clock()
         screen = pygame.display.set_mode((700, 700))
         screen.fill(color=(90, 0, 30)) # to set a color of window
         pygame.display.set_caption("Fly_in")
-        # bg = pygame.image.load("back.jpeg")
-        # screen.blit(bg,(0,0))
+        # # bg = pygame.image.load("back.jpeg")
+        # # screen.blit(bg,(0,0))
         scale, off_x, off_y = self.compute(screen)
-        self.draw_connections(screen, scale, off_x, off_y, 60)
-        self.draw_zone(screen, scale, off_x, off_y, 60)
-        self.draw_drone(screen, scale, off_x, off_y, 60)
-        pygame.display.flip() # to update content on the display screen
-        run = True 
+        # self.draw_connections(screen, scale, off_x, off_y, self.size)
+        # self.draw_zone(screen, scale, off_x, off_y, self.size)
+        # # self.draw_drone(screen, scale, off_x, off_y, 60)
+        # pygame.display.flip() # to update content on the display screen
+        run = True
+        start_map = 1
         while(run):
             for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    run = False
-
-        pygame.quit()
+               if event.type == pygame.QUIT:
+                     run = False
+               if start_map:
+                            screen.fill(color=(90, 0, 30))
+                            self.draw_connections(screen, scale, off_x, off_y, self.size)
+                            self.draw_zone(screen, scale, off_x, off_y, self.size)
+                            self.draw_drone(screen, scale, off_x, off_y, self.size)
+                            pygame.display.flip()
+                            start_map = 0 
+               if event.type == pygame.KEYDOWN: #Checks if a keyboard key was pressed
+                if event.key == pygame.K_a: # check the key exact 
+                        
+                    if  not self.simulation.finish:
+                    # screen = pygame.display.set_mode((700, 700))
+                            screen.fill(color=(90, 0, 30))
+                            self.draw_connections(screen, scale, off_x, off_y, self.size)
+                            self.draw_zone(screen, scale, off_x, off_y, self.size)
+                            self.simulation.move_drones()
+                            self.draw_drone(screen, scale, off_x, off_y, self.size)
+                            # self.draw_drone(screen, scale, off_x, off_y, 60)
+                            # self.clock.tick(60)
+                            pygame.display.flip() # to update content on the display screen
+                            self.clock.tick(2)
+                    # pygame.quit()
+                # return screen, scale, off_x, off_y , self.size
 
     def compute(self, screen):
         w, h = screen.get_size()
@@ -74,12 +98,13 @@ class Visualisation:
             screen.blit(txt, txt_rect)
     
     def draw_drone(self,screen ,scale, off_x, off_y, size):
-      half = size // 2
       for drone in self.drones:
-          x = self.zones[drone.current_zone].x *scale + off_x + half
-          y = self.zones[drone.current_zone].y *scale + off_y + half
+          if drone.in_transit:
+               x = ((self.zones[drone.current_zone].x  + drone.next_zone.x ) / 2 )*scale + off_x 
+               y = ((self.zones[drone.current_zone].y  + drone.next_zone.y) / 2 ) *scale + off_y
+          else:
+            x = self.zones[drone.current_zone].x *scale + off_x 
+            y = self.zones[drone.current_zone].y *scale + off_y 
           d = pygame.image.load("drone.png")
           d = pygame.transform.scale(d, (size , size))
           screen.blit(d,(x,y))
-    
-

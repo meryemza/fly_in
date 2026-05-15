@@ -13,11 +13,12 @@ def main():
     path = pathfound(graph)
     pathh = path.find_path()
     print(pathh)
+    print(data.drones)
+    # screen, scale, off_x, off_y , size = visualisation.run()
     simulation = Simulation(graph, pathh)
+    visualisation = Visualisation(graph, simulation).run()
     print(data.drones)
-    move = simulation.move_drones()
-    print(data.drones)
-    visualisation = Visualisation(graph).run()
+    print(f"number of turns is {simulation.nb_turns}")
 
 try:
     main()
