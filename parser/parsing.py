@@ -150,6 +150,10 @@ class parser:
         if not line :
             return data
         line = line.replace("[", "").replace("]", "").strip()
+        # form = r"\s*(\w+)\s*=\s*(\w+)\s*"
+        # result = re.findall(form, line)
+        # for k in result:
+        #      data[k[0]] = k[1]
         for k in line.split():
             if "=" not in k:
                 raise MapError(f"invalid metadata format in line {nb_line}")
@@ -158,6 +162,7 @@ class parser:
                 raise MapError(f"invalid meta data in line {nb_line}")
             if not key or not value:
                 raise MapError(f"uncomplete meta data in line {nb_line}")
+        
             data[key] = value
         return data
 
