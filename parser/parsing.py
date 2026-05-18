@@ -8,9 +8,14 @@ import re
 
 
 class parser:
+    """ Parses map file and return  Data including drones, zones,
+    and connections with validation of all constraints."""
+
     zone = ["normal", "blocked", "restricted", "priority"]
 
     def parse_data(self, path: str) -> Data:
+        """ Reads and parses the map file. and return a Data object"""
+
         Drones: List[Drone] = []
         zones: dict[str, Hub] = {}
         start_hub = None
@@ -139,6 +144,8 @@ class parser:
             raise MapError(f"invalid number in line {nb_line}")
 
     def validate_hub(self, nb_line: int, line: str) -> Hub:
+        """Parses and validates a hub (zone definition) return  Hub object."""
+
         meta_data: dict[str, str] = {}
         line_format = r":\s*(\w+)\s+(-?\d+)\s+(-?\d+)\s*(?:\[(.*?)\])?$"
         data = re.search(line_format, line)
@@ -177,6 +184,8 @@ class parser:
                 )
 
     def validate_data(self, nb_line: int, line: str) -> dict:
+        """ Parses metadata inside square brackets."""
+
         data: dict[str, str] = {}
         if not line:
             return data
@@ -199,6 +208,8 @@ class parser:
         return data
 
     def validate_connection(self, nb_line: int, line: str):
+        """Parses and validates connection between two zones."""
+
         meta_data = {}
         line_format = r":\s*(\w+)-(\w+)\s*(?:\[(.*?)\])?$"
         data = re.search(line_format, line)

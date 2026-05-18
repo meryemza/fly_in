@@ -1,11 +1,12 @@
 PYTHON = python3
+FILE ?=
 
 install:
 	pip install pygame
-	pip install mypy
+	pip install mypy flake8
 
 run :
-	$(PYTHON) main.py
+	$(PYTHON) main.py $(FILE)
 
 clean :
 	@find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
@@ -13,4 +14,10 @@ clean :
 
 re : clean run
 
-.PHONY : run clean
+lint:
+	flake8 .
+	mypy . --warn-return-any \
+	--warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs \
+	--check-untyped-defs
+
+.PHONY: install run clean re lint

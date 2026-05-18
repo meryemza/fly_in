@@ -3,6 +3,14 @@ from objects.Data import Data
 
 
 class Visualisation:
+    """
+    Pygame-based visualization system for the drone simulation.
+    Responsible for:
+    Rendering zones and connections
+    Displaying drone positions
+    Handling camera movement
+    Updating the simulation visually turn by turn"""
+
     def __init__(self, data: Data, simulation) -> None:
         self.zones = data.zones
         self.drones = data.drones
@@ -14,6 +22,8 @@ class Visualisation:
         self.simulation = simulation
 
     def run(self) -> None:
+        """Starts the visualization loop and handles user interaction."""
+
         pygame.init()
         self.clock = pygame.time.Clock()
         info = pygame.display.Info()
@@ -66,7 +76,7 @@ class Visualisation:
                         self.draw_drone(screen)
                         pygame.display.flip()
 
-                    if event.key == pygame.K_a:  # check the key exact
+                    if event.key == pygame.K_a:
 
                         if not self.simulation.finish:
                             screen.fill(color=(90, 0, 30))
@@ -78,6 +88,8 @@ class Visualisation:
                             self.clock.tick(2)
 
     def draw_connections(self, screen) -> None:
+        """Draws all connections between zones on the screen."""
+
         for con in self.connections:
             x1 = self.zones[con.zone1].x * self.scale + self.offset_x
             y1 = self.zones[con.zone1].y * self.scale + self.offset_y
@@ -86,6 +98,8 @@ class Visualisation:
             pygame.draw.line(screen, (150, 150, 150), (x1, y1), (x2, y2), 2)
 
     def draw_zone(self, screen) -> None:
+        """Draws all zones with their names and colors.
+        if a zone color is invalid, a default pink color is used."""
         font = pygame.font.SysFont("consolas", 14)
         for zon in self.zones.values():
             x = zon.x * self.scale + self.offset_x
@@ -103,6 +117,10 @@ class Visualisation:
             screen.blit(txt, txt_rect)
 
     def draw_drone(self, screen):
+        """Draws drones on the map.
+            Normal drones are displayed inside their current zone
+            Drones in restricted-zone transit are displayed between zones"""
+
         for drone in self.drones:
             if drone.in_transit:
                 x = (

@@ -5,6 +5,9 @@ import heapq
 
 
 class pathfound:
+    """using a Dijkstra-like algorithm to compute the
+    lowest-cost path between start and end zones."""
+
     def __init__(self, data: Data) -> None:
         self.zones = data.zones
         self.start = data.start
@@ -19,6 +22,10 @@ class pathfound:
             return 1
 
     def find_path(self) -> List[str]:
+        """Computes and return the shortest weighted path from start
+        to end using a Dijkstra-style algorithm with a
+        priority queue ."""
+
         distance: dict[str, float] = {}
         previous: dict[str, str] = {}
         path = []

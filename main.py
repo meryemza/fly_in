@@ -2,18 +2,19 @@ from parser.parsing import parser
 from path import pathfound
 from simulation import Simulation
 from visualisation import Visualisation
+import sys
 
 
 def main() -> None:
+    if len(sys.argv) != 2:
+        print("run program with make run FILE=map_file")
+        return
     p = parser()
-    data = p.parse_data("01_linear_path.txt")
-    # graph = Graph(data)
-    # graph.build()
+    data = p.parse_data(sys.argv[1])
     path = pathfound(data)
     pathh = path.find_path()
     print(pathh)
     print(data.drones)
-    # screen, scale, off_x, off_y , size = visualisation.run()
     simulation = Simulation(data, pathh)
     Visualisation(data, simulation).run()
     print(data.drones)
