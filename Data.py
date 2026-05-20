@@ -1,6 +1,6 @@
-from .Drone import Drone
-from .Zone import Hub
-from .Connection import Connection
+from Drone import Drone
+from Zone import Hub
+from Connection import Connection
 
 
 class Data:

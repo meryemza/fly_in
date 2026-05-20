@@ -8,6 +8,9 @@ install:
 run :
 	$(PYTHON) main.py $(FILE)
 
+debug:
+	$(PYTHON) -m pdb main.py $(FILE)
+
 clean :
 	@find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
 	@find . -type d -name ".mypy_cache" -exec rm -rf {} + 2>/dev/null || true
@@ -20,4 +23,4 @@ lint:
 	--warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs \
 	--check-untyped-defs
 
-.PHONY: install run clean re lint
+.PHONY: install run clean debug re lint

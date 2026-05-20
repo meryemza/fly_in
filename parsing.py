@@ -1,8 +1,8 @@
-from .class_error import MapError
-from objects.Zone import Hub
-from objects.Drone import Drone
-from objects.Connection import Connection
-from objects.Data import Data
+from class_error import MapError
+from Zone import Hub
+from Drone import Drone
+from Connection import Connection
+from Data import Data
 from typing import List
 import re
 
@@ -35,12 +35,12 @@ class parser:
                         continue
                     elif line.startswith("nb_drones"):
                         if first_line:
-                            raise MapError(f"nb_drones duplicate in line{k}")
+                            raise MapError(f"nb_drones duplicate in line {k}")
                         nb_drones = self.validate_drones(k, line)
                         first_line = 1
                         continue
                     elif not first_line:
-                        raise MapError("nb_drones should be the first line")
+                        raise MapError("messing nb_drones, should be the first line")
                     elif line.startswith("start_hub"):
                         if start_hub:
                             raise MapError("start_hub duplicate")
@@ -93,6 +93,10 @@ class parser:
                         coordonate.append((zone.x, zone.y))
                         zones[zone.name] = zone
                     elif line.startswith("connection"):
+                        if not start_hub:
+                            raise MapError("start_hub is missing")
+                        if not end_hub:
+                            raise MapError("end_hub is missing")
                         con = self.validate_connection(k, line)
                         for co in connetcion:
                             if (
@@ -103,18 +107,16 @@ class parser:
                             ):
                                 raise MapError(f"duplicate connection "
                                                f"in line {k}")
-                        if con.zone1 not in zones or con.zone2 not in zones:
-                            raise MapError(f"invalide zone in line {k}")
+                        if con.zone1 not in zones:
+                            raise MapError(f"Zone {con.zone1} does not exist in zones at line {k}")
+                        if con.zone2 not in zones:
+                             raise MapError(f"Zone {con.zone2} does not exist in zones at line {k}")
                         connetcion.append(con)
                     else:
                         raise MapError(f"invalide line in lin {k}")
 
         except FileNotFoundError:
             raise MapError("file not found")
-        if not start_hub:
-            raise MapError("start_hub is missing")
-        if not end_hub:
-            raise MapError("end_hub is missing")
         for i in range(nb_drones):
             Drones.append(Drone(i + 1, start_hub.name))
 
@@ -125,8 +127,8 @@ class parser:
                 zones[con.zone2].type != "blocked"
                 and zones[con.zone1].type != "blocked"
             ):
-                z1.neighbors.append((z2.name, con.capacity))
-                z2.neighbors.append((z1.name, con.capacity))
+                z1.neighbors.append(z2.name)
+                z2.neighbors.append(z1.name)
         zones[start_hub.name].current_drones = nb_drones
         return Data(nb_drones, Drones, start_hub, end_hub, zones, connetcion)
 
@@ -207,14 +209,14 @@ class parser:
             data[key] = value
         return data
 
-    def validate_connection(self, nb_line: int, line: str):
+    def validate_connection(self, nb_line: int, line: str) -> Connection:
         """Parses and validates connection between two zones."""
 
         meta_data = {}
         line_format = r":\s*(\w+)-(\w+)\s*(?:\[(.*?)\])?$"
         data = re.search(line_format, line)
         if not data:
-            raise MapError(f"invalid line format in lie {nb_line}")
+            raise MapError(f"invalid line format in line {nb_line}")
         zone1, zone2 = data.group(1), data.group(2)
         meta_data = self.validate_data(nb_line, data.group(3))
         if not meta_data:

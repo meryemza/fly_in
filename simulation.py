@@ -1,23 +1,28 @@
-from objects.Data import Data
-from objects.Connection import Connection
+from Data import Data
+from Connection import Connection
 from typing import List, Tuple
 
 
 class Simulation:
     """Core simulation engine for multi-drone movement on a zone graph
-      Uses a shared path for all drones and resolves conflicts using
-      per-turn reservation system (zone_reserved / con_reserved)."""
+    Uses a shared path for all drones and resolves conflicts using
+    per-turn reservation system (zone_reserved / con_reserved)."""
 
-    def __init__(self, data: Data, path) -> None:
+    def __init__(self, data: Data, path: List[List[str]]) -> None:
         self.drones = data.drones
         self.nb_drones = data.nb_drones
-        self.path = path
+        self.paths = path
         self.zones = data.zones
         self.connection = data.connections
         self.finish = False
         self.nb_turns = 0
 
+    def fill_paths(self) -> None:
+        for i in range(len(self.drones)):
+            self.drones[i].path = self.paths[i % len(self.paths)]
+
     def move_drones(self) -> None:
+        self.fill_paths()
         """ Executes one simulation turn for all drones.
            Handles all cases of drones (currently in transit, normale)
            and Computes next valid moves based on:
@@ -36,31 +41,31 @@ class Simulation:
             if drone.finished:
                 continue
 
-            if next_index >= len(self.path):
+            if next_index >= len(drone.path):
                 continue
-            con = self.get_connection(self.path[current_index],
-                                      self.path[next_index])
-            next_zone = self.zones[self.path[next_index]]
-            current_zone = self.zones[self.path[current_index]]
-            if drone.in_transit and next_index < len(self.path):
+            con = self.get_connection(drone.path[current_index],
+                                      drone.path[next_index])
+            next_zone = self.zones[drone.path[next_index]]
+            current_zone = self.zones[drone.path[current_index]]
+            if drone.in_transit and next_index < len(drone.path):
 
                 drone.remaining_turns -= 1
                 if drone.remaining_turns == 0:
-                    future_zone = (
-                        (zone_reserved.get(next_zone.name, 0))
-                        + next_zone.current_drones
+                    # future_zone = (
+                    #     (zone_reserved.get(next_zone.name, 0))
+                    #     + next_zone.current_drones
+                    # )
+                    # if future_zone < next_zone.max_drones:
+                    #     zone_reserved[next_zone.name] = (
+                    #         zone_reserved.get(next_zone.name, 0) + 1
+                    #     )
+                    #     zone_reserved[current_zone.name] = (
+                    #         zone_reserved.get(current_zone.name, 0) - 1
+                    #     )
+                    actions.append(
+                        ("arrive", drone, con, next_zone, current_zone,
+                         next_index)
                     )
-                    if future_zone < next_zone.max_drones:
-                        zone_reserved[next_zone.name] = (
-                            zone_reserved.get(next_zone.name, 0) + 1
-                        )
-                        zone_reserved[current_zone.name] = (
-                            zone_reserved.get(current_zone.name, 0) - 1
-                        )
-                        actions.append(
-                            ("arrive", drone, con, next_zone, current_zone,
-                             next_index)
-                        )
 
                 continue
 
@@ -78,8 +83,8 @@ class Simulation:
             if zone_avail > 0 and con_avail > 0:
 
                 zone_reserved[next_zone.name] = (
-                    zone_reserved.get(next_zone.name, 0) + 1
-                )
+                    zone_reserved.get(next_zone.name, 0)
+                    + 1)
                 zone_reserved[current_zone.name] = (
                     zone_reserved.get(current_zone.name, 0) - 1
                 )
@@ -103,7 +108,7 @@ class Simulation:
                 next_zone.current_drones += 1
                 current_zone.current_drones -= 1
                 drone.current_index = next_index
-                drone.current_zone = self.path[next_index]
+                drone.current_zone = drone.path[next_index]
                 moves.append(f"D{drone.id}-{drone.current_zone}")
             if action[0] == "transit":
                 _, drone, con, next_zone, current_zone, next_index = action
@@ -111,7 +116,7 @@ class Simulation:
                 con.current_load += 1
                 drone.remaining_turns = 1
                 current_zone.current_drones -= 1
-                drone.next_zone = self.zones[self.path[next_index]]
+                drone.next_zone = self.zones[drone.path[next_index]]
                 moves.append(f"D{drone.id}-{current_zone.name}-"
                              f"{next_zone.name}")
             if action[0] == "move":
@@ -119,10 +124,10 @@ class Simulation:
                 next_zone.current_drones += 1
                 current_zone.current_drones -= 1
                 drone.current_index = next_index
-                drone.current_zone = self.path[next_index]
+                drone.current_zone = drone.path[next_index]
                 moves.append(f"D{drone.id}-{drone.current_zone}")
         for drone in self.drones:
-            if drone.current_zone == self.path[-1] and not drone.finished:
+            if drone.current_zone == drone.path[-1] and not drone.finished:
                 drone.finished = True
             if drone.finished:
                 fini += 1

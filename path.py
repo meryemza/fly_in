@@ -1,5 +1,5 @@
-from objects.Data import Data
-from objects.Zone import Hub
+from Data import Data
+from Zone import Hub
 from typing import List
 import heapq
 
@@ -21,36 +21,27 @@ class pathfound:
         else:
             return 1
 
-    def find_path(self) -> List[str]:
-        """Computes and return the shortest weighted path from start
+    def find_path(self, nb: int = 2) -> List[List[str]]:
+        """Computes and return list of shortest  paths from start
         to end using a Dijkstra-style algorithm with a
         priority queue ."""
 
-        distance: dict[str, float] = {}
-        previous: dict[str, str] = {}
-        path = []
-        heap: List[tuple[float, str]] = [(0, self.start.name)]
-        for zone in self.zones.values():
-            if zone.name == self.start.name:
-                distance[zone.name] = 0
-            else:
-                distance[zone.name] = float("inf")
-        while heap:
-            current_cost, current_zone = heapq.heappop(heap)
+        paths: List[List[str]] = []
+        heap: List[tuple[float, str, List[str]]] = [
+            (0, self.start.name, [self.start.name])
+        ]
+        while heap and nb > len(paths):
+            current_cost, current_zone, path = heapq.heappop(heap)
             if current_zone == self.end.name:
-                break
+                paths.append(path)
+                continue
             for neighbor in self.zones[current_zone].neighbors:
-                neighbor_name = neighbor[0]
-                cost_neighbor = self.get_cost(self.zones[neighbor_name])
-                cost_total = current_cost + cost_neighbor
-                if cost_total < distance[neighbor_name]:
-                    distance[neighbor_name] = cost_total
-                    previous[neighbor_name] = current_zone
-                    heapq.heappush(heap, (cost_total, neighbor_name))
-
-        node = self.end.name
-        while node != self.start.name:
-            path.append(node)
-            node = previous[node]
-        path.append(self.start.name)
-        return path[::-1]
+                if neighbor in path:
+                    continue
+                cost_neighbor = self.get_cost(self.zones[neighbor])
+                total_cost = cost_neighbor + current_cost
+                new_path = path + [neighbor]
+                heapq.heappush(heap, (total_cost, neighbor, new_path))
+        if not paths:
+            raise ValueError("invalid path found")
+        return paths

@@ -1,4 +1,4 @@
-from parser.parsing import parser
+from parsing import parser
 from path import pathfound
 from simulation import Simulation
 from visualisation import Visualisation
@@ -11,13 +11,11 @@ def main() -> None:
         return
     p = parser()
     data = p.parse_data(sys.argv[1])
-    path = pathfound(data)
-    pathh = path.find_path()
-    print(pathh)
-    print(data.drones)
-    simulation = Simulation(data, pathh)
+    path_found = pathfound(data)
+    paths = path_found.find_path()
+    print(paths)
+    simulation = Simulation(data, paths)
     Visualisation(data, simulation).run()
-    print(data.drones)
     print(f"number of turns is {simulation.nb_turns}")
 
 

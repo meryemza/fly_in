@@ -1,2 +1,0 @@
-class MapError(Exception):
-    pass
