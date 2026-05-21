@@ -192,10 +192,6 @@ class parser:
         if not line:
             return data
         line = line.replace("[", "").replace("]", "").strip()
-        # form = r"\s*(\w+)\s*=\s*(\w+)\s*"
-        # result = re.findall(form, line)
-        # for k in result:
-        #      data[k[0]] = k[1]
         for k in line.split():
             if "=" not in k:
                 raise MapError(f"invalid metadata "
