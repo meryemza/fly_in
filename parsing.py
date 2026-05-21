@@ -191,7 +191,7 @@ class parser:
                 meta_data["color"], max_drones
                 )
 
-    def validate_data(self, nb_line: int, line: str) -> dict:
+    def validate_data(self, nb_line: int, line: str) -> dict[str, str]:
         """ Parses metadata inside square brackets."""
 
         data: dict[str, str] = {}
@@ -222,7 +222,7 @@ class parser:
         zone1, zone2 = data.group(1), data.group(2)
         meta_data = self.validate_data(nb_line, data.group(3))
         if not meta_data:
-            meta_data["max_link_capacity"] = 1
+            meta_data["max_link_capacity"] = "1"
 
         if int(meta_data["max_link_capacity"]) <= 0:
             raise MapError(f"invalide number for max link "

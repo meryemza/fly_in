@@ -20,7 +20,6 @@ def main() -> None:
     # print(paths)
     simulation = Simulation(data, paths, show)
     Visualisation(data, simulation).run()
-    print(f"number of turns is {simulation.nb_turns}")
 
 
 try:

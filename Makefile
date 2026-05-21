@@ -5,7 +5,7 @@ install:
 	pip install pygame
 	pip install mypy flake8
 
-run :
+run:
 	$(PYTHON) main.py $(FILE)
 
 debug:
