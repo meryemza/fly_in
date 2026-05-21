@@ -40,7 +40,9 @@ class parser:
                         first_line = 1
                         continue
                     elif not first_line:
-                        raise MapError("messing nb_drones, should be the first line")
+                        raise MapError(
+                            "messing nb_drones, should be in "
+                            "the first line")
                     elif line.startswith("start_hub"):
                         if start_hub:
                             raise MapError("start_hub duplicate")
@@ -108,15 +110,19 @@ class parser:
                                 raise MapError(f"duplicate connection "
                                                f"in line {k}")
                         if con.zone1 not in zones:
-                            raise MapError(f"Zone {con.zone1} does not exist in zones at line {k}")
+                            raise MapError(f"Zone {con.zone1} does not exist "
+                                           f"in zones at line {k}")
                         if con.zone2 not in zones:
-                             raise MapError(f"Zone {con.zone2} does not exist in zones at line {k}")
+                            raise MapError(f"Zone {con.zone2} does not exist "
+                                           f"in zones at line {k}")
                         connetcion.append(con)
                     else:
                         raise MapError(f"invalide line in lin {k}")
 
         except FileNotFoundError:
             raise MapError("file not found")
+        if start_hub is None or end_hub is None:
+            raise MapError("missing hubs")
         for i in range(nb_drones):
             Drones.append(Drone(i + 1, start_hub.name))
 
@@ -129,7 +135,7 @@ class parser:
             ):
                 z1.neighbors.append(z2.name)
                 z2.neighbors.append(z1.name)
-        zones[start_hub.name].current_drones = nb_drones
+            zones[start_hub.name].current_drones = nb_drones
         return Data(nb_drones, Drones, start_hub, end_hub, zones, connetcion)
 
     def validate_drones(self, nb_line: int, line: str) -> int:

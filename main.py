@@ -6,7 +6,7 @@ import sys
 
 
 def main() -> None:
-    if "--capacity-info"  in sys.argv:
+    if "--capacity-info" in sys.argv:
         show = True
     else:
         show = False

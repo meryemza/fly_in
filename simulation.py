@@ -8,7 +8,7 @@ class Simulation:
     Uses a shared path for all drones and resolves conflicts using
     per-turn reservation system (zone_reserved / con_reserved)."""
 
-    def __init__(self, data: Data, path: List[List[str]], show) -> None:
+    def __init__(self, data: Data, path: List[List[str]], show: bool) -> None:
         self.drones = data.drones
         self.nb_drones = data.nb_drones
         self.paths = path
@@ -34,7 +34,6 @@ class Simulation:
 
         moves = []
         shows = []
-        conn_use = {}
         zone_reserved: dict[str, int] = {}
         con_reserved: dict[Connection, int] = {}
         actions: List[Tuple] = []
@@ -120,10 +119,12 @@ class Simulation:
                 drone.current_zone = drone.path[next_index]
                 moves.append(f"D{drone.id}-{drone.current_zone}")
         for zone in self.zones.values():
-            shows.append(f"Zone {zone.name}: {zone.current_drones}/{zone.max_drones} drones\n")
+            shows.append(f"Zone {zone.name}: "
+                         f"{zone.current_drones}/{zone.max_drones} drones\n")
         for con in self.connection:
             current_con = con_reserved.get(con, 0)
-            shows.append(f"Connection {con.zone1}-{con.zone2}: {current_con}/{con.capacity} capacity\n")
+            shows.append(f"Connection {con.zone1}-{con.zone2}: "
+                         f"{current_con}/{con.capacity} capacity\n")
         for drone in self.drones:
             if drone.current_zone == drone.path[-1] and not drone.finished:
                 drone.finished = True
@@ -134,7 +135,7 @@ class Simulation:
         print(" ".join(moves))
         if self.show:
             print(" ".join(shows))
-    
+
         self.nb_turns += 1
 
     def get_connection(self, zone1: str, zone2: str) -> Connection:
