@@ -3,4 +3,4 @@ class Connection:
         self.zone1 = zone1
         self.zone2 = zone2
         self.capacity = capacity
-        self.current_load = 0
+        self.current_load = 0  
